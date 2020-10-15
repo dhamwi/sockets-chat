@@ -22,16 +22,19 @@ io.on('connection', (client) => {
 
         // Se lanza cada vez que una persona entra o sale del chat
         client.broadcast.to(data.sala).emit('listaPersonas', usuarios.getPersonasPorSala(data.sala));
+        client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador ', `${data.nombre} se unió...`));
 
         callback(usuarios.getPersonasPorSala(data.sala));
     });
 
-    client.on('crearMensaje', (data) => {
+    client.on('crearMensaje', (data, callback) => {
         let persona = usuarios.getPersona(client.id);
         let mensaje = crearMensaje(persona.nombre, data.mensaje);
 
         // Lo enviamos a todo el mundo
         client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+        // Para tener la respuesta de que se envió el mensaje
+        callback(mensaje);
     });
 
     client.on('disconnect', () => {
